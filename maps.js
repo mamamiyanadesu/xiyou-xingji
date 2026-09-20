@@ -1,4 +1,5 @@
 let sdkPromise;const resolved=new Map();
+import {navigationUrl} from './navigation.mjs';
 export function mapKey(){try{return sessionStorage.getItem('xiyou-baidu-ak')||window.XIYOU_CONFIG?.baiduAk||''}catch{return window.XIYOU_CONFIG?.baiduAk||''}}
 export function sdk(){
  if(window.BMap?.Map)return Promise.resolve(window.BMap);
@@ -10,9 +11,17 @@ export async function searchPlace(place){
  const B=await sdk();return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('地点查询超时，请重试。')),10000);const search=new B.LocalSearch(place.region,{onSearchComplete:r=>{clearTimeout(timer);if(search.getStatus()!==0||!r?.getCurrentNumPois())return reject(Error('未找到匹配地点，请在百度地图核实地点名称。'));const found=[];for(let i=0;i<Math.min(r.getCurrentNumPois(),5);i++){const x=r.getPoi(i);if(x.point)found.push({name:x.title,address:x.address,point:x.point})}resolve(found)}});search.search(place.query||place.name)})
 }
 export function rememberPlace(id,candidate){resolved.set(id,candidate)}
+export function restorePlaces(saved){resolved.clear();for(const [id,p] of Object.entries(saved))resolved.set(id,p)}
 export function confirmedPlace(id){return resolved.get(id)}
-export async function resolvePlace(place){if(resolved.has(place.id))return resolved.get(place.id);const candidates=await searchPlace(place);const exact=candidates.filter(c=>c.name===place.name);if(exact.length===1){resolved.set(place.id,exact[0]);return exact[0]}throw Error('请先在现实地图中确认“'+place.name+'”的具体地点，再规划路线。')}
-export async function routeLeg(a,b,mode='walking',map=null){const B=await sdk();return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('路线查询超时，请稍后重试。')),12000);const C=mode==='driving'?B.DrivingRoute:B.WalkingRoute;const route=new C(a.point,{...(map?{renderOptions:{map,autoViewport:true}}:{}),onSearchComplete:r=>{clearTimeout(timer);if(route.getStatus()!==0||!r?.getNumPlans())return reject(Error('未找到可用路线，请更换出行方式或地点。'));const p=r.getPlan(0);resolve({seconds:p.getDuration(false),meters:p.getDistance(false),from:a.name,to:b.name})}});route.search(a.point,b.point)})}
+export async function resolvePlace(place){if(resolved.has(place.id)){const B=await sdk(),p=resolved.get(place.id);return {...p,point:new B.Point(p.point.lng,p.point.lat)}}throw Error('请先在现实地图中确认“'+place.name+'”的具体地点，再规划路线。')}
+export async function routeLeg(a,b,mode='walking',map=null){const B=await sdk();return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('路线查询超时，请稍后重试。')),12000);const C=mode==='driving'?B.DrivingRoute:B.WalkingRoute;const route=new C(a.point,{...(map?{renderOptions:{map,autoViewport:true}}:{}),onSearchComplete:r=>{clearTimeout(timer);if(route.getStatus()!==0||!r?.getNumPlans())return reject(Error('未找到可用路线，请更换出行方式或地点。'));const p=r.getPlan(0);const path=[];for(let i=0;i<p.getNumRoutes();i++)for(const point of p.getRoute(i).getPath())path.push({lng:point.lng,lat:point.lat});resolve({seconds:p.getDuration(false),meters:p.getDistance(false),from:a.name,to:b.name,path,navigation:navigationUrl(a,b,mode),queriedAt:new Date().toISOString()})}});route.search(a.point,b.point)})}
 export async function planTrip(items,places,mode){const points=[];for(const i of items){const p=places.find(x=>x.id===i.id);points.push(await resolvePlace(p))}const legs=[];for(let i=1;i<points.length;i++)legs.push(await routeLeg(points[i-1],points[i],mode));return legs;}
 export async function locate(){const B=await sdk();return new Promise((resolve,reject)=>{const g=new B.Geolocation();const timer=setTimeout(()=>reject(Error('定位超时。可重试或选择手动记录。')),12000);g.getCurrentPosition(function(r){clearTimeout(timer);if(this.getStatus()!==0||!r?.point)return reject(Error('未能获取位置。请允许定位，或使用手动记录。'));if(!Number.isFinite(r.accuracy)||r.accuracy>100)return reject(Error('定位精度不足，无法辅助确认到访。可以重试或手动记录。'));resolve(r)},{enableHighAccuracy:true,timeout:10000,maximumAge:0})})}
 export function externalSearch(place){return 'https://api.map.baidu.com/place/search?'+new URLSearchParams({query:place.name,region:place.region,output:'html',src:'webapp.xiyouxingji'})}
+export async function drawTrip(container,legs){
+ const B=await sdk();if(!container.isConnected)return;
+ const map=new B.Map(container);map.enableScrollWheelZoom(true);const all=[];
+ for(const leg of legs){const path=(leg.path||[]).map(p=>new B.Point(p.lng,p.lat));if(path.length>1){map.addOverlay(new B.Polyline(path,{strokeColor:'#ae7927',strokeWeight:5,strokeOpacity:.9}));all.push(...path)}}
+ if(all.length)map.setViewport(all);else throw Error('暂未返回路线图，请使用分段导航。');
+ return map;
+}
