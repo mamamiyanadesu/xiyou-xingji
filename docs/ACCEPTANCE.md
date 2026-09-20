@@ -1,13 +1,17 @@
 # 参赛闭环验收记录
 
-日期：2026-09-20 19:16 CST。工作分支：`feat/competition-ready`。
+日期：2026-09-20 19:16 CST（本地验收），2026-09-20 19:45 CST（线上真实验收）。
+工作分支：`feat/competition-ready`。已提交 `07af989`，已发布到 `gh-pages`（`5507e61`）。
 
-本记录仅基于当前工作区文件、命令输出和本轮本地浏览器验收；未依赖旧对话结论。未推送、未部署、未发布。
+本记录基于当前工作区文件、命令输出和真实浏览器验收；未依赖旧对话结论。
 
 ## 当前工作区
 
-- `git status --short --branch`：`README.md`、`dist/app.js`、`dist/maps.js`、`dist/sources.html`、`dist/state.mjs` 已修改；`dist/navigation.mjs`、`dist/request-guard.mjs`、`dist/source-return.js`、`docs/ACCEPTANCE.md`、`docs/PRD-v1.0.md`、`tests/backup-v1.json`、`tests/navigation.test.mjs`、`tests/recovery.test.mjs`、`tests/request-guard.test.mjs`、`tests/source-return.test.mjs` 未跟踪。
+- 提交历史：`07af989`（参赛收口，含状态 v2、POI 确认、路线绘制、来源页返回、损坏恢复、接入浏览器端 AK）叠在 `854e862`（三站试读原型）之上。
+- 提交范围：`README.md`、`dist/app.js`、`dist/config.js`、`dist/maps.js`、`dist/sources.html`、`dist/state.mjs` 修改；`dist/navigation.mjs`、`dist/request-guard.mjs`、`dist/source-return.js`、`docs/ACCEPTANCE.md`、`docs/HANDOFF-2026-09-20.md`、`docs/PRD-v1.0.md`、`tests/backup-v1.json`、`tests/navigation.test.mjs`、`tests/recovery.test.mjs`、`tests/request-guard.test.mjs`、`tests/source-return.test.mjs` 新增。
 - 当前目录没有 `package.json`；可用命令来自 README：`node server.mjs`、`node --test tests/*.test.mjs`。
+- 环境注意：在沙箱隔离下执行 git 写操作会残留 `.git/*.lock`，导致下一条 git 命令失败。清锁命令 `find .git -name '*.lock' -delete`，且 git 收口须在沙箱外权限下运行。
+
 
 ## 已验证
 
@@ -31,22 +35,41 @@
 - 分段导航链接与真实路线几何绘制代码。
 - 加入行程反馈、心得草稿离开提醒、部分过期请求及建议失效保护。
 
-## 未验证
+## 线上真实验收（2026-09-20 19:45 CST）
 
-- 真实百度 JSAPI 搜索、真实路线服务、真实路线图渲染：本轮没有可用于公开部署的浏览器 AK，路线图验收使用浏览器 mock SDK，只证明前端状态和绘制链路。
-- 公开 GitHub Pages 新访客可用地图：`dist/config.js` 当前仍为 `window.XIYOU_CONFIG = { baiduAk: '' };`，没有公开浏览器 AK，不能标记为通过。
-- 外部百度导航页面实际打开后的展示：当前已验证 URL 生成，不等于百度页面实测成功。
+发布方式：`git subtree push --prefix dist origin gh-pages`，快进更新 `985c328..5507e61`，未经强推。GitHub Pages 构建状态 `built`，耗时约 31.8 秒。
+
+验证环境：真实浏览器新会话，无 `sessionStorage` AK，仅依赖线上 `config.js` 的公开浏览器 AK。
+
+- 资源可达性：线上 `index.html`、`navigation.mjs`、`request-guard.mjs`、`source-return.js`、`state.mjs`、`maps.js`、`sources.html`、`style.css` 全部 HTTP 200。此前缺失的三个新文件已上线。
+- 线上 `config.js` 已带上浏览器端 AK，HTTP 200。
+- AK 链路：百度 JSAPI `getscript` 端点返回正常脚本，无 `APP REFERER ERROR`、无 AK 校验失败。
+- 真实地图渲染：进入「现实地图」后点击「地图中查看」，`window.BMapGL` 为 object，地图容器出现 canvas，页面显示百度版权与水印信息，真实瓦片正常绘制。
+- 真实 POI 搜索：搜索「玄奘广场」返回 5 条真实候选（玄奘法师铜像、玄奘纪念馆(西安店)、玄奘三藏院、唐玄奘大型4d体验剧项目组委会、玄武门广场）；搜索「唐城墙遗址公园」返回 5 条真实候选。候选不唯一时程序要求用户确认，符合设计。
+- 真实路线服务：确认 `玄奘法师铜像` 与 `唐城墙遗址公园` 后计算步行路线，页面显示「游览共 105 分钟 ＋ 交通 116 分钟 ＝ 221 分钟」及「玄奘法师铜像 → 唐城墙遗址公园：8.1 公里，116 分钟」。
+- 真实路线图渲染：行程页出现百度地图 canvas 与真实步行路线折线，截图见 `/tmp/xiyou-live-route-2.png`。
+- 分段导航链接：使用确认后的真实坐标生成，例如
+  `https://api.map.baidu.com/direction?origin=latlng:34.222217424496144,108.97063796377019|name:玄奘法师铜像&destination=latlng:34.2267769510005,108.89541727392559|name:唐城墙遗址公园&mode=walking&coord_type=bd09ll&output=html&src=webapp.xiyouxingji`
+- 行程状态：加入两站后导航角标显示 2，刷新前状态与行程页渲染一致。
+
+截图证据：`/tmp/xiyou-live-map-1.png`（线上地图渲染）、`/tmp/xiyou-live-route-2.png`（线上真实路线折线）。
+
+## 仍未验证
+
+- 外部百度导航页面实际打开后的展示：已验证 URL 生成含真实坐标，但未在浏览器中实开百度页面。
 - 定位辅助真实浏览器权限、精度不足和 200 米判断：未用真实地理位置测试；P0 可用手动到访覆盖。
-- 线上版本：本轮未推送、未部署，线上仍不是当前工作区版本。
-  - 补充实测（2026-09-20 19:30 复核）：远端已有 `gh-pages` 分支（`985c328`），GitHub Pages 状态 `built`，线上地址 `https://mamamiyanadesu.github.io/xiyou-xingji/` 可访问。线上是旧版，缺少 `navigation.mjs`、`request-guard.mjs`、`source-return.js`，`config.js` 同样为空 AK。因此发布动作是覆盖 gh-pages，不是在 Pages 上从零启用。
+- 线上手动文牒记录、刷新恢复、备份恢复、四视口响应式的线上重跑：本地已验收，线上未重跑。
+- Referer 白名单收紧后的回归：当前 AK 在无白名单限制下可用；白名单写入 GitHub Pages 域名后需重跑一次线上地图与路线。
 
-## 阻塞
+## 剩余阻塞
 
-- 公开访客地图配置阻塞于浏览器端百度 AK：需要提供或确认可公开放入静态前端的 JSAPI 浏览器 AK，并在百度控制台限制 GitHub Pages 域名 Referer。不得使用服务端 SK 或 MCP 密钥。
-- GitHub Pages 发布阻塞于用户明确授权；本轮硬性边界要求不发布、不部署、不强推。
+- 浏览器端 AK 的 Referer 白名单尚未写入百度控制台。当前 AK 可无 Referer 调用，属于偏宽松状态；应在控制台把白名单限制为 `https://mamamiyanadesu.github.io` 与 `https://mamamiyanadesu.github.io/xiyou-xingji/`，收紧后重跑线上回归。
+- 部署目标域名待用户确认（见交接文档「线上现状」一节的域名疑问）。
 
 ## 下一步
 
-1. 用户确认公开浏览器 AK 的来源与 Referer 白名单后，写入或注入 `dist/config.js`，再用无 sessionStorage 的新会话验证真实搜索、真实路线和路线图。
-2. 获得发布授权后，常规推送当前分支并等待 GitHub Pages 构建；不要强推。
-3. 发布后用线上 URL 重跑 P0：新访客故事到 POI、两站路线、手动文牒、刷新恢复、备份恢复、390/430/768/1440 视口。
+1. 在百度控制台为该浏览器端 AK 写入 Referer 白名单，只放实际部署域名，不使用 `*` 通配。
+2. 白名单生效后，用无 `sessionStorage` 的新会话重跑线上 P0：新访客故事到 POI、两站真实路线、手动文牒、刷新恢复、备份恢复、390/430/768/1440 视口。
+3. 确认部署域名归属后，同步更新 `DEPLOY.md` 里的 `<你的用户名>` 占位与本文档域名描述。
+4. 如需把后续改动再次上线，继续用 `git subtree push --prefix dist origin gh-pages`，不要强推。
+
