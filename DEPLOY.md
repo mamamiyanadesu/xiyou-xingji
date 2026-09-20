@@ -26,14 +26,22 @@ git subtree push --prefix dist origin gh-pages
 
 ## 3. 加入 Referer 白名单
 
-在刚创建的 AK 的「Referer 白名单」里加入两个地址：
+在 AK 的「Referer 白名单」输入框里按百度规定的格式填写。规则是：**单个输入框，多个域名用英文半角逗号分隔**，支持通配符，例：`*.mysite.com*,*myapp.com*`。
+
+本项目填这一条即可：
 
 ```text
-https://mamamiyanadesu.github.io
-https://mamamiyanadesu.github.io/xiyou-xingji/
+*.mamamiyanadesu.github.io*
 ```
 
-白名单只放你实际部署的域名。不要把 `*` 通配符白名单当作正式发布方案。
+- 开头的 `*` 覆盖协议（`https://`），结尾的 `*` 覆盖路径。一条同时匹配 `https://mamamiyanadesu.github.io` 与 `https://mamamiyanadesu.github.io/xiyou-xingji/`（及其子路径），不需要写成两条。
+- 想收得更紧，只允许本项目路径：`*.mamamiyanadesu.github.io/xiyou-xingji*`。
+
+注意事项：
+
+- **不要填单个 `*`**。那等于不做任何限制，前端 AK 会被任意网站盗用。
+- 不要一行一个域名，控制台按英文逗号解析。
+- 白名单只放你实际部署的域名。
 
 ## 4. 验证
 

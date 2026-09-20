@@ -83,7 +83,7 @@
 
 ## 剩余阻塞
 
-- 浏览器端 AK 的 Referer 白名单尚未确认写入百度控制台。当前 AK 可无 Referer 调用，属于偏宽松状态；应在控制台把白名单限制为 `https://mamamiyanadesu.github.io` 与 `https://mamamiyanadesu.github.io/xiyou-xingji/`，收紧后重跑线上回归。
+- 浏览器端 AK 的 Referer 白名单尚未确认写入百度控制台。当前 AK 可无 Referer 调用，属于偏宽松状态；应在控制台按百度格式（单框、英文逗号分隔、支持通配符）填 `*.mamamiyanadesu.github.io*`，收紧后重跑线上回归。
 - 部署域名已确认为 `mamamiyanadesu.github.io`（2026-09-20 用户确认），`DEPLOY.md` 占位已替换完毕。
 - 旧浏览器端 AK 已弃用，应从百度控制台删除或停用，避免遗留可用凭据。
 
