@@ -64,12 +64,11 @@
 ## 剩余阻塞
 
 - 浏览器端 AK 的 Referer 白名单尚未写入百度控制台。当前 AK 可无 Referer 调用，属于偏宽松状态；应在控制台把白名单限制为 `https://mamamiyanadesu.github.io` 与 `https://mamamiyanadesu.github.io/xiyou-xingji/`，收紧后重跑线上回归。
-- 部署目标域名待用户确认（见交接文档「线上现状」一节的域名疑问）。
+- 部署域名已确认为 `mamamiyanadesu.github.io`（2026-09-20 用户确认），`DEPLOY.md` 占位已替换完毕。
 
 ## 下一步
 
 1. 在百度控制台为该浏览器端 AK 写入 Referer 白名单，只放实际部署域名，不使用 `*` 通配。
 2. 白名单生效后，用无 `sessionStorage` 的新会话重跑线上 P0：新访客故事到 POI、两站真实路线、手动文牒、刷新恢复、备份恢复、390/430/768/1440 视口。
-3. 确认部署域名归属后，同步更新 `DEPLOY.md` 里的 `<你的用户名>` 占位与本文档域名描述。
-4. 如需把后续改动再次上线，继续用 `git subtree push --prefix dist origin gh-pages`，不要强推。
+3. 如需把后续改动再次上线，继续用 `git subtree push --prefix dist origin gh-pages`，不要强推。
 

@@ -10,13 +10,15 @@ git commit -m "site: xiyou xingji prototype"
 git subtree push --prefix dist origin gh-pages
 ```
 
-然后在仓库 Settings → Pages 选择 `Deploy from a branch`，分支选 `gh-pages`、目录 `/ (root)`。
+然后到仓库 Settings → Pages，选择 `Deploy from a branch`，分支选 `gh-pages`、目录 `/ (root)`。
 
-线上地址形如：
+**当前部署状态（2026-09-20 已生效）**
 
-```text
-https://<你的用户名>.github.io/xiyou-xingji/
-```
+- 仓库：`mamamiyanadesu/xiyou-xingji`（public）
+- Pages source：`gh-pages` 分支 / `(root)`，`https_enforced: true`
+- 线上地址：https://mamamiyanadesu.github.io/xiyou-xingji/
+
+注意：Pages 的 source 是 `gh-pages`，**推 `main` 或功能分支不会触发部署**，只有 `git subtree push --prefix dist origin gh-pages` 会。
 
 ## 2. 创建浏览器端 AK
 
@@ -27,8 +29,8 @@ https://<你的用户名>.github.io/xiyou-xingji/
 在刚创建的 AK 的「Referer 白名单」里加入两个地址：
 
 ```text
-https://<你的用户名>.github.io
-https://<你的用户名>.github.io/xiyou-xingji/
+https://mamamiyanadesu.github.io
+https://mamamiyanadesu.github.io/xiyou-xingji/
 ```
 
 白名单只放你实际部署的域名。不要把 `*` 通配符白名单当作正式发布方案。
@@ -39,6 +41,13 @@ https://<你的用户名>.github.io/xiyou-xingji/
 
 ## 关于密钥
 
-- `dist/config.js` 里的 `baiduAk` 留空，密钥不进入 Git。
-- 演示时用站内「配置地图服务」把 AK 写进当前标签页会话；关闭标签页即失效。
-- 浏览器端 AK 对访客可见，必须依赖 Referer 白名单限制来源，不要把服务端 SK 放进网页。
+- 站点使用**浏览器端** JSAPI AK，值写在 `dist/config.js` 的 `baiduAk`，随静态站点公开。浏览器端 AK 对访客本来就是可见的，这不是泄露；真正的访问边界是 Referer 白名单。
+- **该 AK 已进入 Git 并已上线**（`dist/config.js`，2026-09-20）。转 AK 或改白名单后，需要重新执行第 1 节的 `git subtree push` 才会生效；只改百度控制台不重发站点也生效，因为校验在百度侧。
+- 演示或临时换 AK，用站内「配置地图服务」写入当前标签页的 `sessionStorage`，优先级高于 `config.js`，关闭标签页即失效。
+- **绝对不要**把服务端 SK、MCP 密钥或任何非浏览器端凭据放进 `config.js` 或任何会进 Git 的文件。本机用于百度地图 MCP 的那个 AK 是服务端类型，不能拿来填这里。
+
+## 5. 改 AK 或白名单后的回归
+
+1. 百度控制台改完白名单，等 1～2 分钟生效。
+2. 打开线上地址，进入「现实地图」，确认：地图 SDK 加载成功、真实 POI 可搜索、两站真实路线可计算、路线图渲染出折线。
+3. 若报 `APP REFERER ERROR`，说明当前域名不在白名单；若 AK 校验失败，核对 AK 是否启用了 JavaScript API、类型是否为「浏览器端」。
