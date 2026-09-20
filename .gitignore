@@ -1,0 +1,5 @@
+.DS_Store
+node_modules/
+docs/test-backup.json
+tmp/
+*.log

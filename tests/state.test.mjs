@@ -1,0 +1,5 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {blankState,validateBackup,summarize,removableStops} from '../dist/state.mjs';
+test('reject cross-region and malformed backups before replacement',()=>{let s=blankState();s.trip=[{id:'xuanzang',minutes:45,must:true},{id:'lugu',minutes:120,must:false}];assert.throws(()=>validateBackup(s),/同一区域/);s.trip=[{id:'xuanzang',minutes:-1,must:false}];assert.throws(()=>validateBackup(s));s.trip=[];s.notes={unknown:'text'};assert.throws(()=>validateBackup(s));});
+test('retain literal user notes without interpreting markup',()=>{let s=blankState();s.notes.changan='<img src=x onerror=alert(1)>';assert.equal(validateBackup(s).notes.changan,s.notes.changan)});
+test('unknown travel remains unknown, never claim total itinerary time',()=>{assert.deepEqual(summarize([{minutes:45},{minutes:60}],null),{visit:105,travel:null,total:null});assert.deepEqual(summarize([{minutes:45}],[{seconds:120}]),{visit:45,travel:2,total:47})});
+test('must-visit stops excluded from removal candidates',()=>{assert.deepEqual(removableStops([{id:'xuanzang',must:true},{id:'yanping',must:false}]).map(x=>x.id),['yanping'])});
