@@ -39,15 +39,20 @@ https://mamamiyanadesu.github.io/xiyou-xingji/
 
 部署后用浏览器打开线上地址，进入「现实地图」。若仍提示地图未就绪，按 F12 查看控制台：`APP REFERER ERROR` 表示当前域名不在白名单，AK 校验错误则先核对 AK 是否启用 JavaScript API。
 
-## 关于密钥
-
-- 站点使用**浏览器端** JSAPI AK，值写在 `dist/config.js` 的 `baiduAk`，随静态站点公开。浏览器端 AK 对访客本来就是可见的，这不是泄露；真正的访问边界是 Referer 白名单。
-- **该 AK 已进入 Git 并已上线**（`dist/config.js`，2026-09-20）。转 AK 或改白名单后，需要重新执行第 1 节的 `git subtree push` 才会生效；只改百度控制台不重发站点也生效，因为校验在百度侧。
-- 演示或临时换 AK，用站内「配置地图服务」写入当前标签页的 `sessionStorage`，优先级高于 `config.js`，关闭标签页即失效。
-- **绝对不要**把服务端 SK、MCP 密钥或任何非浏览器端凭据放进 `config.js` 或任何会进 Git 的文件。本机用于百度地图 MCP 的那个 AK 是服务端类型，不能拿来填这里。
-
 ## 5. 改 AK 或白名单后的回归
 
 1. 百度控制台改完白名单，等 1～2 分钟生效。
 2. 打开线上地址，进入「现实地图」，确认：地图 SDK 加载成功、真实 POI 可搜索、两站真实路线可计算、路线图渲染出折线。
 3. 若报 `APP REFERER ERROR`，说明当前域名不在白名单；若 AK 校验失败，核对 AK 是否启用了 JavaScript API、类型是否为「浏览器端」。
+
+### 换 AK 与改白名单的区别
+
+- **只改白名单**：校验在百度侧完成，不用重发站点，改完等生效即可。
+- **换 AK**：`dist/config.js` 里的值变了，必须重新执行第 1 节的 `git subtree push --prefix dist origin gh-pages`，线上才会拿到新 AK。
+
+## 关于密钥
+
+- 站点使用**浏览器端** JSAPI AK，值写在 `dist/config.js` 的 `baiduAk`，随静态站点公开。浏览器端 AK 对访客本来就是可见的，这不是泄露；真正的访问边界是 Referer 白名单。
+- **该 AK 已进入 Git 并已上线**（`dist/config.js`，2026-09-20）。
+- 演示或临时换 AK，用站内「配置地图服务」写入当前标签页的 `sessionStorage`，优先级高于 `config.js`，关闭标签页即失效。
+- **绝对不要**把服务端 SK、MCP 密钥或任何非浏览器端凭据放进 `config.js` 或任何会进 Git 的文件。本机用于百度地图 MCP 的那个 AK 是服务端类型，不能拿来填这里。
