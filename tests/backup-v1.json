@@ -1,0 +1,1 @@
+{"version":1,"read":{"changan":true},"notes":{"changan":"隔离验收备份，不代表真实到访。"},"visits":[{"id":"xuanzang","method":"manual","date":"2026-09-20T00:00:00.000Z"}],"trip":[{"id":"xuanzang","minutes":45,"must":true},{"id":"yanping","minutes":60,"must":false}],"positions":{"13":120}}

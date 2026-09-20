@@ -1,2 +1,4 @@
-// 浏览器端地图 AK 需限制允许的域名。不要在这里放服务端 SK。
-window.XIYOU_CONFIG = { baiduAk: '' };
+// 浏览器端 JSAPI AK。这类 AK 对访客可见，安全依赖百度控制台的 Referer 白名单。
+// 当前白名单应包含 https://mamamiyanadesu.github.io 与 https://mamamiyanadesu.github.io/xiyou-xingji/
+// 不要在这里放服务端 SK 或 MCP 密钥。
+window.XIYOU_CONFIG = { baiduAk: 'AXl3ezNKnt17UbhltUqCv33id56AXiiF' };

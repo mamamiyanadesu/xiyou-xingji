@@ -24,7 +24,7 @@ node server.mjs
 终端会打印本地预览地址。单元测试：
 
 ```bash
-node --test tests
+node --test tests/*.test.mjs
 ```
 
 ## 接入百度地图
