@@ -1,7 +1,7 @@
 # 参赛闭环验收记录
 
 日期：2026-09-20 19:16 CST（本地验收），2026-09-20 19:45 CST（线上真实验收）。
-工作分支：`feat/competition-ready`。已提交 `07af989`，已发布到 `gh-pages`（`5507e61`）。
+工作分支：`feat/competition-ready`。已提交 `07af989`，已发布到 `gh-pages`（`5507e61`；换 AK 后为 `ea30827`）。
 
 本记录基于当前工作区文件、命令输出和真实浏览器验收；未依赖旧对话结论。
 
@@ -54,17 +54,38 @@
 
 截图证据：`/tmp/xiyou-live-map-1.png`（线上地图渲染）、`/tmp/xiyou-live-route-2.png`（线上真实路线折线）。
 
+## 更换浏览器端 AK 后的重验（2026-09-20 20:15 CST）
+
+旧浏览器端 AK 弃用，`dist/config.js` 换成新的浏览器端 AK。发布链路：
+
+- 提交 `61ced23`（`dist/config.js` 换 AK + `DEPLOY.md` 章节调整）。
+- `git subtree push --prefix dist origin gh-pages`：`5507e61..ea30827`，快进，未强推。
+- Pages 构建 `built`，耗时约 40.9 秒。
+- 线上 `config.js` 抓取确认已带新 AK，HTTP 200。
+
+验证环境：真实浏览器新会话，无 `sessionStorage` 覆盖，AK 来自线上 `config.js`。
+
+- 地图 SDK：`BMapGL` 为 object，请求 URL 中 AK 为新值（`api.map.baidu.com/api?v=4.0&ak=<新AK>&callback=xiyouMapReady`）。
+- 地图渲染：地图容器出 canvas，百度版权水印正常。
+- 真实 POI 搜索：搜索「玄奘广场」返回 5 条真实候选（玄奘法师铜像、玄奘纪念馆(西安店)、玄奘三藏院、唐玄奘大型4d体验剧项目组委会、玄武门广场）。
+- 无错误态：页面未出现重试按钮，无 `APP REFERER ERROR`。
+
+截图证据：`/tmp/xiyou-newak-map.png`。
+
+**白名单状态说明**：`api.map.baidu.com/getscript` 端点实测对带正确 Referer、无 Referer、错误 Referer 三种请求均返回正常脚本，因此**白名单是否已生效无法用 curl 判定**，只能在百度控制台核对，并以浏览器实测为准。新 AK 在无白名单收紧的状态下可用，属偏宽松状态。
+
 ## 仍未验证
 
 - 外部百度导航页面实际打开后的展示：已验证 URL 生成含真实坐标，但未在浏览器中实开百度页面。
 - 定位辅助真实浏览器权限、精度不足和 200 米判断：未用真实地理位置测试；P0 可用手动到访覆盖。
 - 线上手动文牒记录、刷新恢复、备份恢复、四视口响应式的线上重跑：本地已验收，线上未重跑。
-- Referer 白名单收紧后的回归：当前 AK 在无白名单限制下可用；白名单写入 GitHub Pages 域名后需重跑一次线上地图与路线。
+- Referer 白名单收紧后的回归：当前新 AK 在未收紧状态下可用；白名单写入 GitHub Pages 域名后需重跑一次线上地图与路线。
 
 ## 剩余阻塞
 
-- 浏览器端 AK 的 Referer 白名单尚未写入百度控制台。当前 AK 可无 Referer 调用，属于偏宽松状态；应在控制台把白名单限制为 `https://mamamiyanadesu.github.io` 与 `https://mamamiyanadesu.github.io/xiyou-xingji/`，收紧后重跑线上回归。
+- 浏览器端 AK 的 Referer 白名单尚未确认写入百度控制台。当前 AK 可无 Referer 调用，属于偏宽松状态；应在控制台把白名单限制为 `https://mamamiyanadesu.github.io` 与 `https://mamamiyanadesu.github.io/xiyou-xingji/`，收紧后重跑线上回归。
 - 部署域名已确认为 `mamamiyanadesu.github.io`（2026-09-20 用户确认），`DEPLOY.md` 占位已替换完毕。
+- 旧浏览器端 AK 已弃用，应从百度控制台删除或停用，避免遗留可用凭据。
 
 ## 下一步
 
